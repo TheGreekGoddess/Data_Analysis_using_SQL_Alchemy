@@ -75,7 +75,6 @@ Now that you have completed your initial analysis, design a Flask API based on t
 * Use Flask `jsonify` to convert your API data into a valid JSON response object.
 
 - - -
-
 ## Bonus: Other Recommended Analyses
 
 * The following are optional challenge queries. These are highly recommended to attempt, but not required for the homework.
@@ -108,4 +107,5 @@ Now that you have completed your initial analysis, design a Flask API based on t
   ![daily-normals](Images/daily-normals.png)
 
 ### Copyright
+<<<<<<< HEAD
 Trilogy Education Services © 2019. All Rights Reserved.
