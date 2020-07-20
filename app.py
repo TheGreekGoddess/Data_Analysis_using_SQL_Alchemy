@@ -23,7 +23,6 @@ Station = Base.classes.station
 app = Flask(__name__)
 
 #-------------------#
-
 # Flask Routes
 
 @app.route("/")
@@ -36,6 +35,7 @@ def home():
            f"/api/v1.0/start<start><br/>"
            f"/api/v1.0/start_and_end <start><end>"
           )
+
 
 # Convert the query results to a dictionary using date as the key and prcp as the value.
 # Reflecting the filter criteria of past 12 months from the Python assignment
