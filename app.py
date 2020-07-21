@@ -1,4 +1,4 @@
-# Import the various dependencies and setup
+# Import the various dependencies and SQL Alchemy, Flask & Jasonify setup
 import datetime as dt
 import numpy as np
 import pandas as pd
@@ -27,13 +27,15 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return(f"Welcome to the Climate App API<br/>"
-           f"<h4> Available routes:</h4> <br/>"
-           f"/api/v1.0/precipitation<br/>"
-           f"/api/v1.0/stations<br/>"
-           f"/api/v1.0/tobs<br/>"
-           f"/api/v1.0/start<start><br/>"
-           f"/api/v1.0/start_and_end <start><end>"
+    return(f" <h1> Welcome to the Climate App API </h1> <br/>"
+           f" <h2> Available routes: </h2> <br/>"           
+           f" <h3> /api/v1.0/precipitation </h3> <br/>"           
+           f" <h3> /api/v1.0/stations </h3> <br/>"           
+           f" <h3> /api/v1.0/tobs </h3> <br/>"           
+           f" <h3> /api/v1.0/&lt;start&gt; </h3>"
+           f" <h4> In place of start, enter a date between 2010-01-01 and 2017-08-23 in YYYY-MM-DD format </h4> <br/>"           
+           f" <h3> /api/v1.0/&lt;start&gt;/&lt;end&gt; </h3>"
+           f" <h4> In place of start and end, enter a date between 2010-01-01 and 2017-08-23 in YYYY-MM-DD format </h4> <br/>"
           )
 
 
@@ -62,7 +64,14 @@ def stations():
     session = Session(engine)
     results = session.query(Measurement.station, func.count(Measurement.station)).\
         group_by(Measurement.station).order_by(func.count(Measurement.station).desc()).all()
-    return jsonify(dict(results))
+    session.close()
+    # Create empty list(s) and dictionary(s) to store results    
+    active_stations = []
+    for id, name in results:
+        station_dict = {}
+        station_dict[id] = name
+        active_stations.append(station_dict)
+    return jsonify(active_stations)
 
 
 # Query the dates and temperature observations of the most active station for the last year of data.
@@ -80,46 +89,54 @@ def tobs():
 
 # Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
 # When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
-@app.route("/api/v1.0/start")
+@app.route("/api/v1.0/<start>")
 def start(start):
+    # Declare the variables
+    start_date = start
+
     # Create the session, query the desired criteria and close the session
     session = Session(engine)
-    start_date = dt.datetime.strptime(start,"%Y-%m-%d")
-    results = session.query(func.min(Measurement.tobs),func.max(Measurement.tobs),func.avg(Measurement.tobs).\
-                            filter(Measurement.date >= start_date)).all()
+    results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),
+                            func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).group_by(Measurement.date).all()
+
     session.close()
-    # Create empty list(s) and dictionary(s) to store results
+    
+    # Create empty list(s) and dictionary(s) to store results    
     date_range_data = []
-    for min, max, avg in results:
+    for start_date, min, max, avg in results:
         data = {}
-        data["Start_Date"] = start_date.strftime("%Y-%m-%d")
-        data["End_Date"] = end_date.strftime("%Y-%m-%d")
-        data["Min"] = round(min,2)
-        data["Max"] = round(max,2)
-        didatact["Avg"] = round(avg,2)
+        data["Start Date"] = start
+        data["Minimum Temperature"] = min
+        data["Maximum Temperature"] = max
+        data["Average Temperature"] = round(avg,2)
         date_range_data.append(data) 
     return jsonify(date_range_data)
 
 
+
 # When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
-@app.route("/api/v1.0/start_and_end")
+@app.route("/api/v1.0/<start>/<end>")
 def end(start, end):
+    # Declare the variables
+    start_date = start
+    end_date = end
+
     # Create the session, query the desired criteria and close the session
     session = Session(engine)
-    start_date = dt.datetime.strptime(start,"%Y-%m-%d")
-    end_date = dt.datetime.strptime(start,"%Y-%m-%d")
-    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs),func.avg(Measurement.tobs).\
-                            filter(Measurement.date >= start_date, Measurement.date <= end_date)).all()
+    results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),\
+                            func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).\
+                            filter(Measurement.date <= end_date).group_by(Measurement.date).all()
+
     session.close()
+    
     # Create empty list(s) and dictionary(s) to store results    
     date_range_data = []
-    for min, max, avg in results:
+    for start_date,min, max, avg in results:
         data = {}
-        data["Start_Date"] = start_date.strftime("%Y-%m-%d")
-        data["End_Date"] = end_date.strftime("%Y-%m-%d")
-        data["Min"] = round(min,2)
-        data["Max"] = round(max,2)
-        didatact["Avg"] = round(avg,2)
+        data["Start Date"] = start
+        data["Minimum Temperature"] = min
+        data["Maximum Temperature"] = max
+        data["Average Temperature"] = round(avg,2)
         date_range_data.append(data) 
     return jsonify(date_range_data)
 
