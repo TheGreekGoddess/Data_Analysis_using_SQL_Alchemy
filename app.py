@@ -23,6 +23,7 @@ Station = Base.classes.station
 app = Flask(__name__)
 
 #-------------------#
+
 # Flask Routes
 
 @app.route("/")
@@ -101,7 +102,6 @@ def start(start):
     session = Session(engine)
     results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),
                             func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).group_by(Measurement.date).all()
-
     session.close()
     
     # Create empty list(s) and dictionary(s) to store results    
