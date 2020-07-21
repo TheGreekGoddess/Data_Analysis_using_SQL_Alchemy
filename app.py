@@ -100,7 +100,7 @@ def start(start):
 
     # Create the session, query the desired criteria and close the session
     session = Session(engine)
-    results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),
+    results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),\
                             func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).group_by(Measurement.date).all()
     session.close()
     
