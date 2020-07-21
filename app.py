@@ -48,6 +48,7 @@ def precipitation():
     results = session.query(Measurement.date,Measurement.prcp).filter(Measurement.date>='2016-08-23',\
                                                                       Measurement.date<='2017-08-23').order_by(Measurement.date).all()
     session.close()
+    
     # Create empty list(s) and dictionary(s) to store results
     all_dates = []
     for date, prcp in results:
@@ -65,6 +66,7 @@ def stations():
     results = session.query(Measurement.station, func.count(Measurement.station)).\
         group_by(Measurement.station).order_by(func.count(Measurement.station).desc()).all()
     session.close()
+    
     # Create empty list(s) and dictionary(s) to store results    
     active_stations = []
     for id, name in results:
@@ -82,6 +84,7 @@ def tobs():
     results = session.query(Measurement.station, Measurement.date, Measurement.prcp).filter(Measurement.station == "USC00519281").\
                 filter(Measurement.date >= "2016-08-23", Measurement.date <= "2017-08-23" ).order_by(Measurement.date).all()
     session.close()
+    
     # Create empty list(s) and dictionary(s) to store results
     active_station_tobs = list(np.ravel(results))
     return jsonify(active_station_tobs)
@@ -113,7 +116,6 @@ def start(start):
     return jsonify(date_range_data)
 
 
-
 # When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
 @app.route("/api/v1.0/<start>/<end>")
 def end(start, end):
@@ -126,7 +128,6 @@ def end(start, end):
     results = session.query(Measurement.date, func.min(Measurement.tobs), func.max(Measurement.tobs),\
                             func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).\
                             filter(Measurement.date <= end_date).group_by(Measurement.date).all()
-
     session.close()
     
     # Create empty list(s) and dictionary(s) to store results    
